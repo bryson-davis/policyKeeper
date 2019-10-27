@@ -1,0 +1,25 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: uniqueinneringresspath
+spec:
+  crd:
+    spec:
+      names:
+        kind: UniqueInnerIngressPath
+        listKind: UniqueInnerIngressPathList
+        plural: uniqueinneringresspaths
+        singular: uniqueinneringresspaths
+  targets:
+    - targe: admission.k8s.gatekeeper.sh
+      rego: |
+        package uniqueinneringresspath
+
+        violation[{"msg": msg}] {
+          host := input.review.object.spec.rules[i].host
+          path_set := {path | path=input.review.object.spec.rules[i].http.paths[_].path}
+          path_array := [path | path=input.review.object.spec.rules[i].http.paths[_].path]
+
+          count(path_set) != count(path_array)
+          msg := sprintf("invalid ingress host %q, duplicated path", [host])
+        }

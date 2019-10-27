@@ -1,0 +1,35 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: uniqueouteringresspath
+spec:
+  crd:
+    spec:
+      names:
+        kind: UniqueOuterIngressPath
+        listKind: UniqueOuterIngressPathList
+        plural: uniqueouteringresspaths
+        singular: uniqueouteringresspaths
+  targets:
+    - targe: admission.k8s.gatekeeper.sh
+      rego: |
+        package uniqueouteringresspath
+
+        violation[{"msg": msg}] {
+          # 取当前的host和相应的path集合
+          host := input.review.object.spec.rules[i].host
+          path_set := {path | path=input.review.object.spec.rules[i].http.paths[_].path}
+
+          # 相应的取出全局其他 的
+          other := data.inventory.namespace[other_ns][otherapiversion]["Ingress"][other_ingress]
+          # 确定不是同一个资源对象
+          not identical(other, input.review)
+
+          # host相同
+          other.spec.rules[j].host == host
+          # path也相当，也就是交集
+          other_path_set := {path | path=other.spec.rules[j].http.paths[_].path}
+          result := path_set & other_path_set
+          count(result) > 0
+          msg := sprintf("invalid ingress host %q with path %v (conflicts with ingress %v in namespace %v)", [host, result, other_ingress, other_ns]) 
+        }
