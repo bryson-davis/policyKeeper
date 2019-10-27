@@ -1,0 +1,9 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: UniqueOutererIngressPath
+metadata:
+  name: uniqueoutereringresspath
+spec:
+  match:
+    kinds:
+      - apiVersion: ["extensions"]
+        kinds: ["Ingress"]
