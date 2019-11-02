@@ -1,0 +1,55 @@
+# 用于实现指定资源对象的imagePullPolicy字段值的限定(资源对象只可以是pod的控制器,比如deployment, daemonset等),其实这个粒度是不够的，要到container那层去
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: designatedimagepullpolicy
+spec:
+  names:
+    kind: DesignatedImagePullPolicy
+    listKind: DesignatedImagePullPolicyList
+    plural: Designatedgimagepullpolicy
+    singular: Designatedimagepullpolicy
+  validation:
+    #Schema for the `parameters` field
+    # metadataname表示这个资源对象的名字,在metadata字段中的,而containersName表示容器的名字
+    openAPIV3Schema:
+      properties:
+        imagePullPolicy:
+          type: string
+        objects:
+          type: array
+          items:
+            type: object
+            properties:
+              namespace:
+                type: string
+              metadataName:
+                type: string
+              containerName:
+                type: string
+
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package designatedimagepullpolicy
+
+        #判断是否是指定对象
+        identical(obj, review) {
+          obj.namespace == review.object.metadata.namespace
+          obj.metadataName == review.object.metadata.name
+        }
+
+        violation[{"msg": msg}] {
+          imagePullPolicy := input.parameters.imagePullPolicy
+          obj := input.parameters.objects[i]
+          identical(obj, input.reivew)
+
+          #不需要判断是否有设置imagePullPolicy，因为在默认情况下，如果镜像的tag不是latest的话，imagePullPolicy的策略是IfNotPresent,会自动填充的
+          #获取指定的image
+          violationContainer := input.review.object.spec.template.spec.containers[j]
+          violationContainer.name == obj.containerName
+
+          violationContainer.imagePullPolicy != imagePullPolicy
+
+          msg := sprintf("<%v>'s imagePullPolicy must be %v", [obj.containerName, imagePullPolicy])
+        }

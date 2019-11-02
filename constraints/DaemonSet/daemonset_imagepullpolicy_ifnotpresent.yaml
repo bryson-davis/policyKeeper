@@ -1,0 +1,15 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: DaemonSetImagePullPolicy
+metadata:
+  name: daemonsetimagepullpolicyifnotpresent
+spec:
+  match:
+    kinds:
+      - apiGroups: ["extensions"]
+        kinds: ["DaemonSet"]
+  parameters:
+    imagePullPolicy: "IfNotPresent"
+    objects:
+      - namespace: "default"
+        metadataName: "nginx-ds"
+        containerName: "nginx"
