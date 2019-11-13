@@ -4,29 +4,31 @@ kind: ConstraintTemplate
 metadata:
   name: designatedimagepullpolicy
 spec:
-  names:
-    kind: DesignatedImagePullPolicy
-    listKind: DesignatedImagePullPolicyList
-    plural: Designatedgimagepullpolicy
-    singular: Designatedimagepullpolicy
-  validation:
-    #Schema for the `parameters` field
-    # metadataname表示这个资源对象的名字,在metadata字段中的,而containersName表示容器的名字
-    openAPIV3Schema:
-      properties:
-        imagePullPolicy:
-          type: string
-        objects:
-          type: array
-          items:
-            type: object
-            properties:
-              namespace:
-                type: string
-              metadataName:
-                type: string
-              containerName:
-                type: string
+  crd:
+    spec:
+      names:
+        kind: DesignatedImagePullPolicy
+        listKind: DesignatedImagePullPolicyList
+        plural: designatedgimagepullpolicy
+        singular: designatedimagepullpolicy
+      validation:
+        #Schema for the `parameters` field
+        # metadataname表示这个资源对象的名字,在metadata字段中的,而containersName表示容器的名字
+        openAPIV3Schema:
+          properties:
+            imagePullPolicy:
+              type: string
+            objects:
+              type: array
+              items:
+                type: object
+                properties:
+                  namespace:
+                    type: string
+                  metadataName:
+                    type: string
+                  containerName:
+                    type: string
 
   targets:
     - target: admission.k8s.gatekeeper.sh
