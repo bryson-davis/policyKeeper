@@ -9,7 +9,7 @@ spec:
         kinds: ["Pod"]
       - apiGroups:
           - extensions
-          - apiGroups
+          - apps 
         kinds: ["Deployment"]
       - apiGroups: ["apps"]
         kinds: ["DaemonSet"]

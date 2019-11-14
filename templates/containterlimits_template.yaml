@@ -149,9 +149,21 @@ spec:
           general_violation[{"msg": msg, "field": "initContainers"}]
         }
 
+        # 以增量的方式获取包含containers对象的上层对象spec，区分pod和deployment等
+        input_containers_spec(review) = spec {
+          review.kind.kind == "Pod"
+          spec := review.object.spec
+        }
+
+        input_containers_spec(review) = spec {
+          review.kind.kind != "Pod"
+          spec := review.object.spec.template.spec
+        }
+
         # 以增量的方式扩展general_violation的内容，这里的field是遍历变量，就跟i,j一样的
         general_violation[{"msg": msg, "field": field}] {
-          container := input.review.object.spec[field][_]
+          # container := input.review.object.spec[field][_]
+         
           cpu_orig := container.resources.limits.cpu
           not canonify_cpu(cpu_orig)
           msg := sprintf("container <%v> cpu limit <%v> could not be parsed", [container.name, cpu_orig])

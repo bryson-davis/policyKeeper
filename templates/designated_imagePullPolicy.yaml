@@ -48,10 +48,10 @@ spec:
 
           #不需要判断是否有设置imagePullPolicy，因为在默认情况下，如果镜像的tag不是latest的话，imagePullPolicy的策略是IfNotPresent,会自动填充的
           #获取指定的image
-          violationContainer := input.review.object.spec.template.spec.containers[j]
-          violationContainer.name == obj.containerName
+          #violationContainer := input.review.object.spec.template.spec.containers[j]
+          #violationContainer.name == obj.containerName
 
-          violationContainer.imagePullPolicy != imagePullPolicy
+          #violationContainer.imagePullPolicy != imagePullPolicy
 
           msg := sprintf("<%v>'s imagePullPolicy must be %v", [obj.containerName, imagePullPolicy])
         }

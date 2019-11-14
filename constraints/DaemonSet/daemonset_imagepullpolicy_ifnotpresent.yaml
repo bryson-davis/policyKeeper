@@ -1,11 +1,11 @@
 apiVersion: constraints.gatekeeper.sh/v1beta1
-kind: DaemonSetImagePullPolicy
+kind: DesignatedImagePullPolicy
 metadata:
   name: daemonsetimagepullpolicyifnotpresent
 spec:
   match:
     kinds:
-      - apiGroups: ["extensions"]
+      - apiGroups: ["apps"]
         kinds: ["DaemonSet"]
   parameters:
     imagePullPolicy: "IfNotPresent"
